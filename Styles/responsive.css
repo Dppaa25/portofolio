@@ -1,0 +1,139 @@
+/* Tablet & Perangkat Sedang */
+@media screen and (max-width: 1200px) {
+  .main-container {
+    width: 90%;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+    .grid-3 {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    .skills-container {
+        gap: 1.5rem 2rem;
+    }
+}
+
+
+/* Mobile & Perangkat Kecil */
+@media screen and (max-width: 768px) {
+  /* Style Global */
+  .section-title {
+    font-size: 2rem;
+    margin: 1rem 0 3rem;
+  }
+  .pre-title {
+    font-size: 0.8rem;
+  }
+  section {
+    padding: 4rem 0;
+  }
+
+  /* Navigasi & Burger Menu */
+  .burger {
+    display: block;
+    cursor: pointer;
+    z-index: 100; /* Must be on top */
+  }
+
+  .nav {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    top: 0;
+    padding: 1.2rem 5%;
+    background-color: var(--primaryBackgroundColor);
+    z-index: 98;
+    border-bottom: 1px solid var(--lineColor);
+  }
+
+  nav ul {
+    position: fixed;
+    top: 0;
+    right: -100%; /* Start off-screen */
+    height: 100vh;
+    width: 60%;
+    max-width: 300px;
+    background: var(--secondaryBackgroundColor);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 2.5rem;
+    transition: right 0.4s ease-in-out;
+    z-index: 99;
+  }
+  
+  nav ul.nav-active {
+    right: 0; /* Slide in */
+  }
+
+  /* Animasi Burger Menu */
+  .burger.toggle .line-1 {
+    transform: rotate(-45deg) translate(-5px, 6px);
+  }
+  .burger.toggle .line-2 {
+    opacity: 0;
+  }
+  .burger.toggle .line-3 {
+    transform: rotate(45deg) translate(-5px, -6px);
+  }
+
+  /* Header & Hero Section */
+  header {
+      padding-top: 5rem; /* Offset for fixed nav */
+  }
+  #hero {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    min-height: auto;
+    text-align: center;
+  }
+  .hero-left {
+    order: 2;
+  }
+  .hero-right {
+    order: 1;
+    margin-bottom: 2rem;
+  }
+  .hero-left .pre-title {
+    margin: 0 auto;
+  }
+  .hero-name {
+    font-size: 2.8rem;
+  }
+  .hero-right img {
+    width: 250px;
+    height: 250px;
+  }
+
+  /* Sections */
+ .grid-3 {
+      grid-template-columns: 1fr;
+  }
+  
+  /* Skills Section Responsive */
+  .skills-container {
+      grid-template-columns: 1fr; /* Single column on mobile */
+      gap: 1.5rem;
+  }
+  
+  /* Contact (Tetap sama) */
+  .contact-layout {
+      padding: 0 1rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+    .main-container {
+        width: 95%;
+    }
+    .hero-name {
+        font-size: 2.2rem;
+    }
+    .section-title {
+        font-size: 1.8rem;
+    }
+}
+

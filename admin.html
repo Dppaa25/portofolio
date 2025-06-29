@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primaryBackgroundColor: #020c1b;
+            --secondaryBackgroundColor: #0a192f;
+            --cardBackgroundColor: #1c2a41;
+            --textColor: #e6f1ff;
+            --secondaryTextColor: #a8b2d1;
+            --accentColor: #64ffda;
+            --accentColorHover: #52d6b8;
+            --lineColor: #233554;
+        }
+        body {
+            background-color: var(--primaryBackgroundColor);
+            color: var(--textColor);
+        }
+        .modal-overlay, .edit-modal {
+            background-color: rgba(0,0,0,0.7);
+        }
+        .modal-content, .card {
+            background-color: var(--cardBackgroundColor);
+            border: 1px solid var(--lineColor);
+        }
+        .form-input {
+            background-color: var(--secondaryBackgroundColor);
+            border: 1px solid var(--lineColor);
+            color: var(--textColor);
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accentColor);
+        }
+        .btn-primary {
+            background-color: var(--accentColor);
+            color: var(--primaryBackgroundColor);
+            font-weight: 700;
+        }
+        .btn-primary:hover {
+            background-color: var(--accentColorHover);
+        }
+        .btn-secondary {
+            background-color: var(--secondaryBackgroundColor);
+            color: var(--secondaryTextColor);
+        }
+         .btn-danger {
+            background-color: #e53e3e;
+            color: white;
+        }
+        .image-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 0.375rem;
+            margin-top: 0.5rem;
+            object-fit: cover;
+            border: 1px solid var(--lineColor);
+        }
+        .nav-link.active {
+            background-color: var(--accentColor);
+            color: var(--primaryBackgroundColor);
+            font-weight: 700;
+        }
+        .btn-link {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background-color: var(--cardBackgroundColor);
+            color: var(--textColor);
+            border: 1px solid var(--lineColor);
+        }
+        
+        #sidebar {
+            background-color: var(--secondaryBackgroundColor);
+            transition: transform 0.3s ease-in-out;
+            z-index: 40;
+        }
+        #sidebar.mobile-active {
+            transform: translateX(0);
+        }
+        #sidebar-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 39;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Login Section -->
+    <div id="login-section" class="flex items-center justify-center min-h-screen p-4">
+        <div class="card p-8 rounded-lg shadow-lg w-full max-w-sm">
+            <h1 class="text-2xl font-bold mb-6 text-center">Admin Login</h1>
+            <form id="login-form">
+                <div id="login-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 hidden" role="alert">
+                  <strong class="font-bold">Gagal!</strong>
+                  <span class="block sm:inline">Password yang Anda masukkan salah.</span>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="block mb-2">Password</label>
+                    <input type="password" id="password" class="form-input w-full p-2 rounded-md">
+                </div>
+                <button type="submit" class="btn-primary w-full p-2 rounded-md">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Admin Panel (Hidden by default) -->
+    <div id="admin-panel" class="hidden">
+        <!-- Mobile Header -->
+        <header class="md:hidden bg-secondaryBackgroundColor p-4 flex justify-between items-center sticky top-0 z-30 shadow-lg">
+             <h2 class="text-xl font-bold text-white">Admin Menu</h2>
+             <button id="mobile-menu-btn" class="text-white focus:outline-none">
+                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+             </button>
+        </header>
+
+        <div class="flex flex-col md:flex-row min-h-screen">
+            <!-- Sidebar Navigation -->
+            <aside id="sidebar" class="transform -translate-x-full md:translate-x-0 fixed md:relative w-64 p-6 flex flex-col flex-shrink-0 h-screen md:h-auto">
+                <h2 class="text-2xl font-bold mb-8 text-white hidden md:block">Admin Menu</h2>
+                <nav id="admin-nav" class="flex-grow">
+                    <ul class="space-y-2">
+                        <li><a href="#" class="nav-link block p-3 rounded-md" data-target="hero-view">Hero Section</a></li>
+                        <li><a href="#" class="nav-link block p-3 rounded-md" data-target="about-view">About Sections</a></li>
+                        <li><a href="#" class="nav-link block p-3 rounded-md" data-target="portfolio-view">Project Items</a></li>
+                        <li><a href="#" class="nav-link block p-3 rounded-md" data-target="article-view">Article Items</a></li>
+                    </ul>
+                </nav>
+                <div class="space-y-2 mt-auto">
+                    <a href="index.html" class="btn-link p-2 rounded-md">Back to Portfolio</a>
+                    <button id="logout-btn" class="btn-danger p-2 rounded-md w-full">Logout</button>
+                </div>
+            </aside>
+            
+            <div id="sidebar-overlay" class="fixed inset-0 hidden md:hidden"></div>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+                
+                <!-- Hero Section View -->
+                <div id="hero-view" class="admin-section">
+                     <div class="card p-6 rounded-lg shadow-lg mb-8">
+                        <h2 class="text-2xl font-bold mb-4">Manage Hero Section</h2>
+                        <form id="hero-form" class="space-y-4">
+                             <div><label for="hero-pre-title" class="block mb-2 text-sm">Pre-title</label><input type="text" id="hero-pre-title" class="form-input w-full p-2 rounded-md"></div>
+                            <div><label for="hero-name" class="block mb-2 text-sm">Name</label><input type="text" id="hero-name" class="form-input w-full p-2 rounded-md"></div>
+                            <div><label for="hero-highlight" class="block mb-2 text-sm">Highlighted Name</label><input type="text" id="hero-highlight" class="form-input w-full p-2 rounded-md"></div>
+                            <div><label for="hero-description" class="block mb-2 text-sm">Description</label><textarea id="hero-description" class="form-input w-full p-2 rounded-md" rows="3"></textarea></div>
+                            <div><label for="hero-image-upload" class="block mb-2 text-sm">Hero Image</label><input type="file" id="hero-image-upload" class="form-input w-full p-2" accept="image/*"><img id="hero-image-preview" src="#" alt="Hero Image Preview" class="hidden image-preview"></div>
+                            <button type="submit" class="btn-primary p-2 rounded-md w-full">Save Hero Section</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- About Sections View -->
+                <div id="about-view" class="admin-section hidden">
+                     <div class="card p-6 rounded-lg shadow-lg mb-8">
+                        <h2 class="text-2xl font-bold mb-4">Manage Education History</h2>
+                        <form id="education-form" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                            <div><label for="edu-title" class="block mb-2 text-sm">University/School</label><input type="text" id="edu-title" class="form-input w-full p-2 rounded-md"></div>
+                            <div><label for="edu-degree" class="block mb-2 text-sm">Degree/Major</label><input type="text" id="edu-degree" class="form-input w-full p-2 rounded-md"></div>
+                            <div><label for="edu-years" class="block mb-2 text-sm">Years</label><input type="text" id="edu-years" class="form-input w-full p-2 rounded-md"></div>
+                            <div class="sm:col-span-3"><button type="submit" class="btn-primary p-2 rounded-md w-full">Add Education</button></div>
+                        </form>
+                        <ul id="education-list" class="mt-4 space-y-2"></ul>
+                    </div>
+                    <div class="card p-6 rounded-lg shadow-lg mb-8">
+                        <h2 class="text-2xl font-bold mb-4">Manage Skills List</h2>
+                        <form id="skill-form" class="flex flex-col sm:flex-row gap-4 items-end">
+                            <div class="flex-grow w-full"><label for="skill-input" class="block mb-2 text-sm">Skill Name</label><input type="text" id="skill-input" class="form-input w-full p-2 rounded-md"></div>
+                            <button type="submit" class="btn-primary p-2 rounded-md h-fit whitespace-nowrap w-full sm:w-auto">Add Skill</button>
+                        </form>
+                        <ul id="skills-list" class="mt-4 space-y-2"></ul>
+                    </div>
+                     <div class="card p-6 rounded-lg shadow-lg mb-8">
+                        <h2 class="text-2xl font-bold mb-4">Manage Other Info</h2>
+                        <div class="mb-6">
+                            <h3 class="text-xl font-semibold mb-3">Work Experience</h3>
+                            <form id="experience-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                                <div><label for="exp-title" class="block mb-2 text-sm">Job Title</label><input type="text" id="exp-title" class="form-input w-full p-2 rounded-md"></div>
+                                <div><label for="exp-company" class="block mb-2 text-sm">Company & Years</label><input type="text" id="exp-company" class="form-input w-full p-2 rounded-md"></div>
+                                <div class="sm:col-span-2"><button type="submit" class="btn-primary p-2 rounded-md w-full">Add Experience</button></div>
+                            </form>
+                            <ul id="experience-list" class="mt-4 space-y-2"></ul>
+                        </div>
+                        <div class="mb-6">
+                            <h3 class="text-xl font-semibold mb-3">Organizations</h3>
+                            <form id="organization-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                                <div><label for="org-name" class="block mb-2 text-sm">Organization Name</label><input type="text" id="org-name" class="form-input w-full p-2 rounded-md"></div>
+                                <div><label for="org-role" class="block mb-2 text-sm">Role & Years</label><input type="text" id="org-role" class="form-input w-full p-2 rounded-md"></div>
+                                <div class="sm:col-span-2"><button type="submit" class="btn-primary p-2 rounded-md w-full">Add Organization</button></div>
+                            </form>
+                            <ul id="organization-list" class="mt-4 space-y-2"></ul>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-3">Activities & Achievements</h3>
+                            <form id="activity-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                                <div><label for="act-title" class="block mb-2 text-sm">Activity/Achievement</label><input type="text" id="act-title" class="form-input w-full p-2 rounded-md"></div>
+                                <div><label for="act-desc" class="block mb-2 text-sm">Description</label><input type="text" id="act-desc" class="form-input w-full p-2 rounded-md"></div>
+                                <div class="sm:col-span-2"><button type="submit" class="btn-primary p-2 rounded-md w-full">Add Activity</button></div>
+                            </form>
+                            <ul id="activity-list" class="mt-4 space-y-2"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Portfolio View -->
+                <div id="portfolio-view" class="admin-section hidden">
+                    <div class="card p-6 rounded-lg shadow-lg mb-8">
+                        <h2 class="text-2xl font-bold mb-4">Manage Project Items</h2>
+                        <form id="create-portfolio-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label for="create-portfolio-title" class="block mb-2">Title</label><input type="text" id="create-portfolio-title" class="form-input w-full p-2 rounded-md" required></div>
+                            <div><label for="create-portfolio-image-upload" class="block mb-2">Image Upload</label><input type="file" id="create-portfolio-image-upload" class="form-input w-full p-2 rounded-md" accept="image/*" required><img id="create-portfolio-image-preview" src="#" alt="Image Preview" class="hidden image-preview"></div>
+                            <div class="md:col-span-2"><label for="create-portfolio-description" class="block mb-2">Description</label><textarea id="create-portfolio-description" class="form-input w-full p-2 rounded-md" rows="3" required></textarea></div>
+                            <div><label for="create-portfolio-tags" class="block mb-2">Tags (comma-separated)</label><input type="text" id="create-portfolio-tags" class="form-input w-full p-2 rounded-md" required></div>
+                            <div class="md:col-span-2"><button type="submit" class="btn-primary p-2 rounded-md w-full">Add Project Item</button></div>
+                        </form>
+                    </div>
+                    <div class="card rounded-lg shadow-lg overflow-hidden">
+                         <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-secondaryBackgroundColor"><tr><th class="p-4">Title</th><th class="p-4 hidden sm:table-cell">Description</th><th class="p-4">Image</th><th class="p-4">Actions</th></tr></thead>
+                                <tbody id="portfolio-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Article View -->
+                <div id="article-view" class="admin-section hidden">
+                    <div class="card p-6 rounded-lg shadow-lg mb-8">
+                        <h2 class="text-2xl font-bold mb-4">Manage Article Items</h2>
+                        <form id="create-article-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label for="create-article-title" class="block mb-2">Title</label><input type="text" id="create-article-title" class="form-input w-full p-2 rounded-md" required></div>
+                            <div><label for="create-article-image-upload" class="block mb-2">Image Upload</label><input type="file" id="create-article-image-upload" class="form-input w-full p-2 rounded-md" accept="image/*" required><img id="create-article-image-preview" src="#" alt="Image Preview" class="hidden image-preview"></div>
+                            <div class="md:col-span-2"><label for="create-article-description" class="block mb-2">Description</label><textarea id="create-article-description" class="form-input w-full p-2 rounded-md" rows="8" required></textarea></div>
+                            <div><label for="create-article-tags" class="block mb-2">Tags (comma-separated)</label><input type="text" id="create-article-tags" class="form-input w-full p-2 rounded-md" required></div>
+                            <div class="md:col-span-2"><button type="submit" class="btn-primary p-2 rounded-md w-full">Add Article Item</button></div>
+                        </form>
+                    </div>
+                    <div class="card rounded-lg shadow-lg overflow-hidden">
+                         <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-secondaryBackgroundColor"><tr><th class="p-4">Title</th><th class="p-4 hidden sm:table-cell">Description</th><th class="p-4">Image</th><th class="p-4">Actions</th></tr></thead>
+                                <tbody id="article-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 edit-modal">
+        <div class="modal-content p-6 rounded-lg shadow-lg w-full max-w-lg">
+            <h2 id="edit-modal-title" class="text-2xl font-bold mb-4">Edit Item</h2>
+            <form id="edit-form">
+                <input type="hidden" id="edit-id">
+                <input type="hidden" id="edit-type">
+                <div class="mb-4"><label for="edit-title" class="block mb-2">Title</label><input type="text" id="edit-title" class="form-input w-full p-2 rounded-md" required></div>
+                <div class="mb-4"><label for="edit-image-upload" class="block mb-2">Change Image</label><input type="file" id="edit-image-upload" class="form-input w-full p-2 rounded-md" accept="image/*"><img id="edit-image-preview" src="#" alt="Current Image" class="image-preview"></div>
+                <div class="mb-4"><label for="edit-description" class="block mb-2">Description</label><textarea id="edit-description" class="form-input w-full p-2 rounded-md" rows="8" required></textarea></div>
+                <div class="mb-4"><label for="edit-tags" class="block mb-2">Tags (comma-separated)</label><input type="text" id="edit-tags" class="form-input w-full p-2 rounded-md" required></div>
+                <div class="flex justify-end gap-4"><button type="button" id="cancel-edit-btn" class="btn-secondary p-2 rounded-md">Cancel</button><button type="submit" class="btn-primary p-2 rounded-md">Save Changes</button></div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dom = {
+                loginSection: document.getElementById('login-section'),
+                adminPanel: document.getElementById('admin-panel'),
+                loginForm: document.getElementById('login-form'),
+                loginError: document.getElementById('login-error'),
+                logoutBtn: document.getElementById('logout-btn'),
+                navLinks: document.querySelectorAll('#admin-nav .nav-link'),
+                adminSections: document.querySelectorAll('.admin-section'),
+                mobileMenuBtn: document.getElementById('mobile-menu-btn'),
+                sidebar: document.getElementById('sidebar'),
+                sidebarOverlay: document.getElementById('sidebar-overlay'),
+                
+                // Hero elements
+                heroForm: document.getElementById('hero-form'),
+                heroImageInput: document.getElementById('hero-image-upload'),
+                heroImagePreview: document.getElementById('hero-image-preview'),
+
+                // About section elements
+                educationForm: document.getElementById('education-form'),
+                educationList: document.getElementById('education-list'),
+                experienceForm: document.getElementById('experience-form'),
+                experienceList: document.getElementById('experience-list'),
+                organizationForm: document.getElementById('organization-form'),
+                organizationList: document.getElementById('organization-list'),
+                activityForm: document.getElementById('activity-form'),
+                activityList: document.getElementById('activity-list'),
+                skillForm: document.getElementById('skill-form'),
+                skillInput: document.getElementById('skill-input'),
+                skillsList: document.getElementById('skills-list'),
+
+                // Portfolio elements
+                createPortfolioForm: document.getElementById('create-portfolio-form'),
+                portfolioTableBody: document.getElementById('portfolio-table-body'),
+                createPortfolioImgInput: document.getElementById('create-portfolio-image-upload'),
+                createPortfolioImgPreview: document.getElementById('create-portfolio-image-preview'),
+                
+                // Article elements
+                createArticleForm: document.getElementById('create-article-form'),
+                articleTableBody: document.getElementById('article-table-body'),
+                createArticleImgInput: document.getElementById('create-article-image-upload'),
+                createArticleImgPreview: document.getElementById('create-article-image-preview'),
+
+                // Edit Modal elements
+                editModal: document.getElementById('edit-modal'),
+                editModalTitle: document.getElementById('edit-modal-title'),
+                editForm: document.getElementById('edit-form'),
+                cancelEditBtn: document.getElementById('cancel-edit-btn'),
+                editImgInput: document.getElementById('edit-image-upload'),
+                editImgPreview: document.getElementById('edit-image-preview'),
+            };
+            
+            if (dom.mobileMenuBtn && dom.sidebar && dom.sidebarOverlay) {
+                dom.mobileMenuBtn.addEventListener('click', () => {
+                    dom.sidebar.classList.toggle('mobile-active');
+                    dom.sidebarOverlay.classList.toggle('hidden');
+                });
+                const closeSidebar = () => {
+                    dom.sidebar.classList.remove('mobile-active');
+                    dom.sidebarOverlay.classList.add('hidden');
+                };
+                dom.sidebarOverlay.addEventListener('click', closeSidebar);
+                dom.navLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth < 768) closeSidebar();
+                    });
+                });
+            }
+
+            const keys = {
+                portfolio: 'portfolioData',
+                article: 'articleData', // New key for articles
+                hero: 'heroData', education: 'educationData',
+                experience: 'experienceData', organization: 'organizationData',
+                activity: 'activityData', skills: 'skillsData'
+            };
+            
+            let currentPortfolioImageBase64 = '';
+            let currentArticleImageBase64 = '';
+            let currentHeroImageBase64 = '';
+            const ADMIN_PASSWORD = "admin";
+
+            // --- Utility Functions ---
+            const getData = (key) => JSON.parse(localStorage.getItem(key)) || [];
+            const saveData = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+            const getObjectData = (key) => JSON.parse(localStorage.getItem(key)) || {};
+            const saveObjectData = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+
+            const handleImagePreview = (input, preview, callback) => {
+                input.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            preview.src = event.target.result;
+                            preview.classList.remove('hidden');
+                            if (callback) callback(event.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            };
+
+            // --- About Section List Manager ---
+            const createListManager = (options) => {
+                const { formEl, listEl, storageKey, renderFn, createItemFn, editHtmlFn, updateItemFn } = options;
+                
+                const render = () => {
+                    const items = getData(storageKey);
+                    if (!listEl) return;
+                    
+                    const validItems = items.filter(item => {
+                        if (!item || !item.id) return false;
+                        if (storageKey === keys.skills && !item.name) return false;
+                        return true;
+                    });
+
+                    listEl.innerHTML = validItems.map(item => `<li class="flex justify-between items-center p-2 bg-secondaryBackgroundColor rounded-md" data-id="${item.id}">${renderFn(item)}</li>`).join('');
+                };
+
+                if (formEl) {
+                    formEl.addEventListener('submit', e => {
+                        e.preventDefault();
+                        const newItem = createItemFn(formEl);
+                        if(!newItem) return;
+                        const items = getData(storageKey);
+                        items.push(newItem);
+                        saveData(storageKey, items);
+                        render();
+                        formEl.reset();
+                    });
+                }
+
+                if (listEl) {
+                    listEl.addEventListener('click', e => {
+                        const li = e.target.closest('li');
+                        if (!li) return;
+                        const id = parseInt(li.dataset.id);
+                        
+                        if (e.target.classList.contains('delete-btn')) {
+                            const items = getData(storageKey);
+                            saveData(storageKey, items.filter(i => i.id !== id));
+                            render();
+                        } else if (e.target.classList.contains('edit-btn')) {
+                            const items = getData(storageKey);
+                            const item = items.find(i => i.id === id);
+                            li.innerHTML = editHtmlFn(item);
+                        } else if (e.target.classList.contains('save-btn')) {
+                            const items = getData(storageKey);
+                            const item = items.find(i => i.id === id);
+                            const updatedItem = updateItemFn(li);
+                            const index = items.findIndex(i => i.id === id);
+                            items[index] = { ...item, ...updatedItem };
+                            saveData(storageKey, items);
+                            render();
+                        } else if (e.target.classList.contains('cancel-btn')) {
+                            render();
+                        }
+                    });
+                }
+                
+                return render;
+            };
+
+            const renderEducationList = createListManager({
+                formEl: dom.educationForm, listEl: dom.educationList, storageKey: keys.education,
+                renderFn: item => `<span><strong>${item.title}</strong> - ${item.degree} (${item.years})</span><div class="flex gap-2"><button class="edit-btn btn-secondary text-sm p-1 px-2 rounded-md">Edit</button><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Delete</button></div>`,
+                createItemFn: f => ({ id: Date.now(), title: f.querySelector("#edu-title").value, degree: f.querySelector("#edu-degree").value, years: f.querySelector("#edu-years").value }),
+                editHtmlFn: item => `<div class="flex-grow grid sm:grid-cols-3 gap-2"><input class="form-input" value="${item.title}"><input class="form-input" value="${item.degree}"><input class="form-input" value="${item.years}"></div><div class="flex gap-2 ml-4"><button class="save-btn btn-primary text-sm p-1 px-2 rounded-md">Save</button><button class="cancel-btn btn-secondary text-sm p-1 px-2 rounded-md">Cancel</button></div>`,
+                updateItemFn: li => ({ title: li.querySelectorAll('input')[0].value, degree: li.querySelectorAll('input')[1].value, years: li.querySelectorAll('input')[2].value })
+            });
+            const renderExperienceList = createListManager({
+                formEl: dom.experienceForm, listEl: dom.experienceList, storageKey: keys.experience,
+                renderFn: item => `<span><strong>${item.title}</strong> - ${item.company}</span><div class="flex gap-2"><button class="edit-btn btn-secondary text-sm p-1 px-2 rounded-md">Edit</button><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Delete</button></div>`,
+                createItemFn: f => ({ id: Date.now(), title: f.querySelector("#exp-title").value, company: f.querySelector("#exp-company").value }),
+                editHtmlFn: item => `<div class="flex-grow grid sm:grid-cols-2 gap-2"><input class="form-input" value="${item.title}"><input class="form-input" value="${item.company}"></div><div class="flex gap-2 ml-4"><button class="save-btn btn-primary text-sm p-1 px-2 rounded-md">Save</button><button class="cancel-btn btn-secondary text-sm p-1 px-2 rounded-md">Cancel</button></div>`,
+                updateItemFn: li => ({ title: li.querySelectorAll('input')[0].value, company: li.querySelectorAll('input')[1].value })
+            });
+            const renderOrganizationList = createListManager({
+                formEl: dom.organizationForm, listEl: dom.organizationList, storageKey: keys.organization,
+                renderFn: item => `<span><strong>${item.name}</strong> - ${item.role}</span><div class="flex gap-2"><button class="edit-btn btn-secondary text-sm p-1 px-2 rounded-md">Edit</button><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Delete</button></div>`,
+                createItemFn: f => ({ id: Date.now(), name: f.querySelector("#org-name").value, role: f.querySelector("#org-role").value }),
+                editHtmlFn: item => `<div class="flex-grow grid sm:grid-cols-2 gap-2"><input class="form-input" value="${item.name}"><input class="form-input" value="${item.role}"></div><div class="flex gap-2 ml-4"><button class="save-btn btn-primary text-sm p-1 px-2 rounded-md">Save</button><button class="cancel-btn btn-secondary text-sm p-1 px-2 rounded-md">Cancel</button></div>`,
+                updateItemFn: li => ({ name: li.querySelectorAll('input')[0].value, role: li.querySelectorAll('input')[1].value })
+            });
+            const renderActivityList = createListManager({
+                formEl: dom.activityForm, listEl: dom.activityList, storageKey: keys.activity,
+                renderFn: item => `<span><strong>${item.title}</strong> - ${item.description}</span><div class="flex gap-2"><button class="edit-btn btn-secondary text-sm p-1 px-2 rounded-md">Edit</button><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Delete</button></div>`,
+                createItemFn: f => ({ id: Date.now(), title: f.querySelector("#act-title").value, description: f.querySelector("#act-desc").value }),
+                editHtmlFn: item => `<div class="flex-grow grid sm:grid-cols-2 gap-2"><input class="form-input" value="${item.title}"><input class="form-input" value="${item.description}"></div><div class="flex gap-2 ml-4"><button class="save-btn btn-primary text-sm p-1 px-2 rounded-md">Save</button><button class="cancel-btn btn-secondary text-sm p-1 px-2 rounded-md">Cancel</button></div>`,
+                updateItemFn: li => ({ title: li.querySelectorAll('input')[0].value, description: li.querySelectorAll('input')[1].value })
+            });
+             const renderSkillsList = createListManager({
+                formEl: dom.skillForm, listEl: dom.skillsList, storageKey: keys.skills,
+                renderFn: item => `<span>${item.name || ''}</span><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Delete</button>`,
+                createItemFn: f => { 
+                    const name = dom.skillInput.value.trim(); 
+                    if (!name) return null;
+                    return { id: Date.now(), name };
+                },
+                editHtmlFn: () => ``,
+                updateItemFn: () => ({})
+            });
+            
+            // --- Generic Item Manager for Portfolio & Articles ---
+            const createItemManager = (type) => {
+                const storageKey = keys[type];
+                const tableBody = dom[`${type}TableBody`];
+                const createForm = dom[`create${type.charAt(0).toUpperCase() + type.slice(1)}Form`];
+                const createImgInput = dom[`create${type.charAt(0).toUpperCase() + type.slice(1)}ImgInput`];
+                const createImgPreview = dom[`create${type.charAt(0).toUpperCase() + type.slice(1)}ImgPreview`];
+                let currentImageBase64 = '';
+
+                handleImagePreview(createImgInput, createImgPreview, (base64) => {
+                    currentImageBase64 = base64;
+                });
+
+                const renderTable = () => {
+                    const items = getData(storageKey);
+                    tableBody.innerHTML = items.map(item => `
+                        <tr class="border-b border-lineColor">
+                            <td class="p-4">${item.title}</td>
+                            <td class="p-4 hidden sm:table-cell">${item.description.substring(0, 50)}...</td>
+                            <td class="p-4"><img src="${item.imageData}" alt="${item.title}" class="w-16 h-16 object-cover rounded-md"></td>
+                            <td class="p-4">
+                                <button class="edit-item-btn btn-secondary text-sm p-1 px-2 rounded-md" data-id="${item.id}" data-type="${type}">Edit</button>
+                                <button class="delete-item-btn btn-danger text-sm p-1 px-2 rounded-md ml-2" data-id="${item.id}" data-type="${type}">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                };
+
+                createForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const newItem = {
+                        id: Date.now(),
+                        title: createForm.querySelector(`input[id$="title"]`).value,
+                        description: createForm.querySelector(`textarea[id$="description"]`).value,
+                        tags: createForm.querySelector(`input[id$="tags"]`).value.split(',').map(t => t.trim()),
+                        imageData: currentImageBase64
+                    };
+                    const items = getData(storageKey);
+                    items.push(newItem);
+                    saveData(storageKey, items);
+                    renderTable();
+                    createForm.reset();
+                    createImgPreview.classList.add('hidden');
+                    currentImageBase64 = '';
+                });
+
+                return renderTable;
+            };
+
+            const renderPortfolioTable = createItemManager('portfolio');
+            const renderArticleTable = createItemManager('article');
+
+            // --- Generic Edit/Delete Listeners on Main Content ---
+            document.querySelector('main').addEventListener('click', (e) => {
+                const target = e.target;
+                const id = parseInt(target.dataset.id);
+                const type = target.dataset.type;
+
+                if (!type || !keys[type]) return;
+
+                const storageKey = keys[type];
+                
+                if (target.classList.contains('delete-item-btn')) {
+                    const items = getData(storageKey).filter(i => i.id !== id);
+                    saveData(storageKey, items);
+                    if (type === 'portfolio') renderPortfolioTable();
+                    if (type === 'article') renderArticleTable();
+                } else if (target.classList.contains('edit-item-btn')) {
+                    const item = getData(storageKey).find(i => i.id === id);
+                    dom.editModalTitle.textContent = `Edit ${type.charAt(0).toUpperCase() + type.slice(1)} Item`;
+                    dom.editForm.querySelector('#edit-id').value = item.id;
+                    dom.editForm.querySelector('#edit-type').value = type;
+                    dom.editForm.querySelector('#edit-title').value = item.title;
+                    dom.editForm.querySelector('#edit-description').value = item.description;
+                    dom.editForm.querySelector('#edit-tags').value = item.tags.join(', ');
+                    dom.editImgPreview.src = item.imageData;
+                    dom.editImgPreview.classList.remove('hidden');
+                    dom.editModal.classList.remove('hidden');
+                }
+            });
+
+            // --- Edit Form Submission ---
+            dom.editForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = parseInt(dom.editForm.querySelector('#edit-id').value);
+                const type = dom.editForm.querySelector('#edit-type').value;
+                const storageKey = keys[type];
+
+                const items = getData(storageKey);
+                const index = items.findIndex(i => i.id === id);
+                let newImageData = items[index].imageData;
+                
+                const onUpdate = (imageData) => {
+                    items[index] = {
+                        id,
+                        title: dom.editForm.querySelector('#edit-title').value,
+                        description: dom.editForm.querySelector('#edit-description').value,
+                        tags: dom.editForm.querySelector('#edit-tags').value.split(',').map(t => t.trim()),
+                        imageData: imageData
+                    };
+                    saveData(storageKey, items);
+                    if (type === 'portfolio') renderPortfolioTable();
+                    if (type === 'article') renderArticleTable();
+                    dom.editModal.classList.add('hidden');
+                };
+
+                if (dom.editImgInput.files && dom.editImgInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => onUpdate(event.target.result);
+                    reader.readAsDataURL(dom.editImgInput.files[0]);
+                } else {
+                    onUpdate(newImageData);
+                }
+            });
+
+
+            const loadAdminData = () => {
+                const heroData = getObjectData(keys.hero);
+                document.getElementById('hero-pre-title').value = heroData.preTitle || '';
+                document.getElementById('hero-name').value = heroData.name || '';
+                document.getElementById('hero-highlight').value = heroData.highlight || '';
+                document.getElementById('hero-description').value = heroData.description || '';
+                if(heroData.imageData) {
+                    dom.heroImagePreview.src = heroData.imageData;
+                    dom.heroImagePreview.classList.remove('hidden');
+                    currentHeroImageBase64 = heroData.imageData;
+                }
+                renderEducationList();
+                renderExperienceList();
+                renderOrganizationList();
+                renderActivityList();
+                renderSkillsList();
+                renderPortfolioTable();
+                renderArticleTable(); // Render article table on load
+            };
+            
+            const setupNavigation = () => {
+                dom.navLinks.forEach(link => {
+                    link.addEventListener('click', e => {
+                        e.preventDefault();
+                        const targetId = link.dataset.target;
+                        dom.adminSections.forEach(section => section.classList.add('hidden'));
+                        document.getElementById(targetId).classList.remove('hidden');
+                        dom.navLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                    });
+                });
+                if(dom.navLinks.length > 0) dom.navLinks[0].click();
+            };
+
+            const checkLogin = () => {
+                if (sessionStorage.getItem('isAdmin') === 'true') {
+                    dom.loginSection.classList.add('hidden');
+                    dom.adminPanel.classList.remove('hidden');
+                    loadAdminData();
+                    setupNavigation();
+                } else {
+                    dom.loginSection.classList.remove('hidden');
+                    dom.adminPanel.classList.add('hidden');
+                }
+            };
+            
+            // --- Global Event Listeners ---
+            dom.loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                dom.loginError.classList.add('hidden');
+                if (document.getElementById('password').value === ADMIN_PASSWORD) {
+                    sessionStorage.setItem('isAdmin', 'true');
+                    checkLogin();
+                } else {
+                    dom.loginError.classList.remove('hidden');
+                    document.getElementById('password').value = '';
+                }
+            });
+
+            dom.logoutBtn.addEventListener('click', () => {
+                sessionStorage.removeItem('isAdmin');
+                checkLogin();
+            });
+
+            dom.heroForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const onUpdate = (imageData) => {
+                    saveObjectData(keys.hero, {
+                        preTitle: document.getElementById('hero-pre-title').value,
+                        name: document.getElementById('hero-name').value,
+                        highlight: document.getElementById('hero-highlight').value,
+                        description: document.getElementById('hero-description').value,
+                        imageData: imageData || currentHeroImageBase64
+                    });
+                     alert('Hero section saved!');
+                };
+                if(dom.heroImageInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => onUpdate(event.target.result);
+                    reader.readAsDataURL(dom.heroImageInput.files[0]);
+                } else {
+                    onUpdate(currentHeroImageBase64);
+                }
+            });
+            
+            dom.cancelEditBtn.addEventListener('click', () => { dom.editModal.classList.add('hidden'); });
+            
+            // Initial Load
+            checkLogin();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,709 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap");
+
+:root {
+  /* Variabel Tema Gelap Minimalis Baru */
+  --primaryTextColor: #e6f1ff;
+  --secondaryTextColor: #a8b2d1;
+
+  /* Warna Aksen Solid */
+  --accentColor: #64ffda;
+  --accentColorHover: #52d6b8;
+  --accentGradient: linear-gradient(90deg, #64ffda, #79ffee);
+
+  /* Warna Latar Belakang Solid dan Gelap */
+  --primaryBackgroundColor: #020c1b; /* Biru sangat gelap, hampir hitam */
+  --secondaryBackgroundColor: #0a192f; /* Latar belakang elemen sekunder */
+  
+  /* Gaya Kartu Solid */
+  --cardBackgroundColor: #0a192f;
+  --cardBorderColor: #1e3a5f;
+  --cardBoxShadow: 0 4px 20px 0 rgba(0, 0, 0, 0.2);
+  --lineColor: #233554; 
+
+  /* Warna Tombol CTA Baru */
+  --ctaButtonBackground: #52d6b8; /* Warna kuning/emas */
+  --ctaButtonBackgroundHover: #52d6b8;
+  --ctaButtonColor: #0a192f;
+
+  --sectionPadding: 6rem 0;
+  --itemBorderRadius: 0.5rem; /* Radius border yang lebih halus */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: var(--primaryBackgroundColor);
+  color: var(--secondaryTextColor);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong {
+  color: var(--primaryTextColor);
+}
+
+p {
+  font-size: 1rem;
+  line-height: 1.9rem;
+}
+
+p,
+span,
+label,
+input,
+textarea,
+li {
+  color: var(--secondaryTextColor);
+}
+
+a {
+  text-decoration: none;
+}
+
+/* --- Container Utama --- */
+.main-container {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+@media screen and (max-width: 1200px) {
+  .main-container {
+    width: 90%;
+  }
+}
+
+/* --- Tombol --- */
+.btn {
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: 1.5px solid var(--accentColor);
+  color: var(--accentColor);
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border-radius: 4px;
+}
+
+.btn:hover {
+  background-color: rgba(100, 255, 218, 0.1);
+}
+
+/* --- Judul Section --- */
+.section-title {
+  margin: 1rem 0 4rem;
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.pre-title {
+  text-transform: uppercase;
+  letter-spacing: 0.5rem;
+  color: var(--accentColor);
+  position: relative;
+  padding-left: 40px;
+  width: fit-content;
+  font-weight: 400;
+  font-size: 0.9rem;
+  margin: 0 auto;
+  display: block;
+}
+
+.pre-title::before {
+  content: "";
+  width: 30px;
+  height: 1px;
+  background: var(--lineColor);
+  position: absolute;
+  display: block;
+  left: 0;
+  top: 50%;
+}
+
+/* --- Navigasi --- */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 0;
+}
+
+.logo a {
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--primaryTextColor);
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+}
+
+nav ul li a {
+  color: var(--primaryTextColor);
+  transition: color 0.3s;
+}
+
+nav ul li a:hover {
+  color: var(--accentColor);
+}
+
+.burger div {
+  width: 25px;
+  height: 2px;
+  background-color: var(--primaryTextColor);
+  margin: 7px;
+  transition: all 0.3s;
+  z-index: 99;
+}
+
+.burger {
+  display: none;
+  z-index: 99;
+  position: fixed;
+  top: 33px;
+  right: 35px;
+}
+
+/* --- Hero Section --- */
+#hero {
+  min-height: 90vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 2rem;
+}
+
+.hero-name {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0.5rem 0 1rem;
+}
+
+.hero-name span {
+  background: var(--accentGradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-right img {
+    width: 350px; /* Menggunakan ukuran tetap untuk kontrol yang lebih baik */
+    height: 350px; /* Menjamin rasio aspek 1:1 untuk lingkaran sempurna */
+    max-width: 80%; /* Batas agar tetap responsif di layar kecil */
+    border-radius: 50%; /* Membuat gambar menjadi lingkaran */
+    object-fit: cover; /* Memastikan gambar memenuhi lingkaran tanpa distorsi */
+    border: 3px solid var(--accentColor); /* Menambahkan border dengan warna aksen */
+    box-shadow: 0 0 25px -5px rgba(100, 255, 218, 0.7); /* Menambahkan efek glow yang halus */
+    animation: float 6s ease-in-out infinite; /* Memperlambat animasi agar lebih tenang */
+}
+
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* --- Bagian Umum untuk Section --- */
+section {
+  padding: var(--sectionPadding);
+}
+
+#services, #education, #activity {
+  background-color: var(--secondaryBackgroundColor);
+}
+
+#portfolios, #skills, #organization, #contact, #experience {
+  background-color: var(--primaryBackgroundColor);
+}
+
+/* Portfolios */
+.portfolio {
+  text-align: left;
+}
+
+.portfolio-cover {
+  height: 250px;
+  margin: -2.5rem -2rem 1.5rem -2rem;
+  border-radius: var(--itemBorderRadius) var(--itemBorderRadius) 0 0;
+  overflow: hidden;
+}
+
+.portfolio img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.portfolio-info {
+  padding: 0;
+}
+
+.portfolio-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.portfolio h4 {
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.portfolio-title a svg {
+  transition: 0.2s ease-in-out;
+  fill: var(--secondaryTextColor);
+}
+
+.portfolio-title a svg:hover {
+  fill: var(--accentColor);
+}
+
+.portfolio-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.portfolio-tags div {
+  font-size: 0.8rem;
+  background-color: var(--primaryBackgroundColor);
+  border: 1px solid var(--lineColor);
+  padding: 0.4rem 0.8rem;
+  color: var(--accentColor);
+  border-radius: 20px;
+}
+
+/* Education Section */
+.education-container {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative; /* For the timeline line */
+}
+
+#education-timeline .education:last-child .line {
+    display: none; /* Hide the trailing line on the last item */
+}
+
+.education {
+  display: flex;
+  gap: 1.5rem;
+  position: relative;
+  padding-left: 30px;
+}
+
+.education .line {
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 2px;
+  height: calc(100% + 1.5rem);
+  background: var(--lineColor);
+}
+
+.education .line div:before {
+  content: "";
+  width: 15px;
+  height: 15px;
+  background: var(--accentColor);
+  border: 3px solid var(--secondaryBackgroundColor);
+  border-radius: 50%;
+  position: absolute;
+  left: -7px;
+}
+
+.education:not(:last-child) {
+    margin-bottom: 3rem;
+}
+
+.education-info p {
+  margin: 0.6rem 0 1rem;
+}
+
+.education-years {
+  margin-bottom: 3rem;
+  color: var(--secondaryTextColor);
+  font-size: 0.9rem;
+}
+
+/* Skills Section */
+#skills {
+    background-color: var(--primaryBackgroundColor);
+}
+
+.skills-container {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem 3rem;
+}
+
+.skill-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.skill-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.skill-info p {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--primaryTextColor);
+    line-height: 1;
+}
+
+.skill-bar-container {
+    width: 100%;
+    height: 8px;
+    background-color: var(--lineColor);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.skill-bar-progress {
+    height: 100%;
+    background: var(--accentGradient);
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+}
+/* /** */
+.skills-card {
+    background: var(--cardBackgroundColor);
+    border: 1px solid var(--cardBorderColor);
+    border-radius: var(--itemBorderRadius);
+    padding: 2.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.skills-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 32px 0 rgba(2, 12, 27, 0.7);
+}
+
+.skills-card p {
+    max-width: 650px;
+    margin: 0 auto 2rem auto;
+}
+.skills-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 2rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+.skills-list ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    line-height: 2rem;
+}
+
+.skills-list ul li::before {
+  content: "▹";
+  color: var(--accentColor);
+  margin-right: 10px;
+}
+
+
+/* --- Experience, Organization, Activity Section --- */
+.single-card-container {
+    display: flex;
+    justify-content: center;
+}
+
+.experience-card {
+    background: var(--cardBackgroundColor);
+    border: 1px solid var(--cardBorderColor);
+    border-radius: var(--itemBorderRadius);
+    padding: 2.5rem 2rem;
+    text-align: left;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    max-width: 900px;
+}
+
+.experience-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 32px 0 rgba(2, 12, 27, 0.7);
+}
+
+/* Menghapus judul H4 di dalam kartu karena judul sudah ada di section */
+.experience-card ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.experience-card li {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.experience-card li::before {
+    content: "▹";
+    color: var(--accentColor);
+    position: absolute;
+    left: 0;
+    top: 2px;
+}
+
+
+.experience-card li:last-child {
+    margin-bottom: 0;
+}
+
+.experience-card h5 {
+    font-size: 1.1rem;
+    color: var(--primaryTextColor);
+    margin-bottom: 0.25rem;
+}
+
+.experience-card p {
+    font-size: 0.9rem;
+    color: var(--secondaryTextColor);
+    line-height: 1.5rem;
+}
+
+
+/* --- Contact Section Baru --- */
+#contact {
+  text-align: center;
+}
+
+.contact-layout {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+#contact .section-title {
+    margin-bottom: 2rem;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.social-icon {
+  background: var(--secondaryBackgroundColor);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.social-icon svg {
+  fill: var(--secondaryTextColor);
+  height: 24px;
+  width: 24px;
+  transition: fill 0.3s ease;
+}
+
+.social-icon:hover {
+  background: var(--cardBorderColor);
+}
+
+.social-icon:hover svg {
+  fill: var(--primaryTextColor);
+}
+
+.value-card {
+  background: var(--secondaryBackgroundColor);
+  border: 1px solid var(--cardBorderColor);
+  border-radius: var(--itemBorderRadius);
+  padding: 2rem;
+  max-width: 400px;
+  margin: 0 auto 3rem auto;
+}
+
+.value-card h3 {
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.price {
+  font-size: 2.5rem;
+  color: var(--primaryTextColor);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.note {
+  font-size: 0.8rem;
+  color: var(--secondaryTextColor);
+}
+
+.cta-text {
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.btn-cta {
+  background-color: var(--ctaButtonBackground);
+  color: var(--ctaButtonColor);
+  padding: 1rem 2.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-cta:hover {
+  background-color: var(--ctaButtonBackgroundHover);
+}
+
+/* Footer */
+footer {
+  padding: 4rem 0;
+  background: var(--secondaryBackgroundColor);
+  text-align: center;
+}
+
+.footer-icons {
+  margin-bottom: 1rem;
+}
+
+.footer-icons a {
+  margin: 0 0.5rem;
+}
+
+.footer-icons svg {
+  fill: var(--secondaryTextColor);
+  transition: fill 0.3s ease;
+}
+
+.footer-icons a:hover svg {
+  fill: var(--accentColor);
+}
+
+
+/* --- Gaya Modal Kontak Baru --- */
+.modal-overlay {
+    display: none; /* Awalnya disembunyikan */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7); /* Latar belakang gelap transparan */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #1c1c1c; /* Warna latar modal seperti referensi */
+    margin: auto;
+    padding: 2.5rem;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    color: var(--primaryTextColor);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--lineColor);
+    padding-bottom: 1rem;
+}
+
+.modal-header h3 {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.close-button {
+    color: var(--secondaryTextColor);
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--primaryTextColor);
+}
+
+.modal-form .form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.modal-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--secondaryTextColor);
+}
+
+.modal-form input,
+.modal-form textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background-color: #2b2b2b; /* Warna input field */
+    border: 1px solid var(--lineColor);
+    border-radius: 4px;
+    color: var(--primaryTextColor);
+    transition: border-color 0.3s ease;
+}
+
+.modal-form input:focus,
+.modal-form textarea:focus {
+    outline: none;
+    border-color: var(--ctaButtonBackground);
+}
+
+.modal-form .btn-cta {
+    width: 100%;
+    margin-top: 1rem;
+}
