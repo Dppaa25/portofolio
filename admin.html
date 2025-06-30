@@ -19,6 +19,7 @@
         body {
             background-color: var(--primaryBackgroundColor);
             color: var(--textColor);
+            font-family: sans-serif;
         }
         .modal-overlay, .edit-modal {
             background-color: rgba(0,0,0,0.7);
@@ -47,6 +48,7 @@
         .btn-secondary {
             background-color: var(--secondaryBackgroundColor);
             color: var(--secondaryTextColor);
+            border: 1px solid var(--lineColor);
         }
          .btn-danger {
             background-color: #e53e3e;
@@ -131,7 +133,7 @@
                     </ul>
                 </nav>
                 <div class="space-y-2 mt-auto">
-                    <a href="index.html" class="btn-link p-2 rounded-md">Back to Portfolio</a>
+                    <a href="index.html" class="btn-link p-2 rounded-md" target="_blank">Back to Portfolio</a>
                     <button id="logout-btn" class="btn-danger p-2 rounded-md w-full">Logout</button>
                 </div>
             </aside>
@@ -271,10 +273,13 @@
         </div>
     </div>
 
-
-    <!-- JavaScript Logic -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // == PENTING ==
+            // Ganti URL ini dengan URL Vercel Anda yang sudah berhasil.
+            const API_URL = 'https://tes-vercel-one.vercel.app/api'; 
+
+            // Object to hold all DOM elements for easy access
             const dom = {
                 loginSection: document.getElementById('login-section'),
                 adminPanel: document.getElementById('admin-panel'),
@@ -326,109 +331,102 @@
                 editImgPreview: document.getElementById('edit-image-preview'),
             };
             
-            if (dom.mobileMenuBtn && dom.sidebar && dom.sidebarOverlay) {
-                dom.mobileMenuBtn.addEventListener('click', () => {
-                    dom.sidebar.classList.toggle('mobile-active');
-                    dom.sidebarOverlay.classList.toggle('hidden');
-                });
-                const closeSidebar = () => {
-                    dom.sidebar.classList.remove('mobile-active');
-                    dom.sidebarOverlay.classList.add('hidden');
-                };
-                dom.sidebarOverlay.addEventListener('click', closeSidebar);
-                dom.navLinks.forEach(link => {
-                    link.addEventListener('click', () => {
-                        if (window.innerWidth < 768) closeSidebar();
-                    });
-                });
-            }
-
-            const keys = {
-                portfolio: 'portfolioData',
-                article: 'articleData', // New key for articles
-                hero: 'heroData', education: 'educationData',
-                experience: 'experienceData', organization: 'organizationData',
-                activity: 'activityData', skills: 'skillsData'
-            };
+            // --- HELPER FUNCTIONS ---
+            // Function to convert an image file to a base64 string
+            const toBase64 = file => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
             
-            let currentPortfolioImageBase64 = '';
-            let currentArticleImageBase64 = '';
-            let currentHeroImageBase64 = '';
-            const ADMIN_PASSWORD = "admin";
-
-            // --- Utility Functions ---
-            const getData = (key) => JSON.parse(localStorage.getItem(key)) || [];
-            const saveData = (key, data) => localStorage.setItem(key, JSON.stringify(data));
-            const getObjectData = (key) => JSON.parse(localStorage.getItem(key)) || {};
-            const saveObjectData = (key, data) => localStorage.setItem(key, JSON.stringify(data));
-
-            const handleImagePreview = (input, preview, callback) => {
+            // Function to handle image preview when a file is selected
+            const handleImagePreview = (input, preview) => {
                 input.addEventListener('change', (e) => {
                     const file = e.target.files[0];
                     if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                            preview.src = event.target.result;
-                            preview.classList.remove('hidden');
-                            if (callback) callback(event.target.result);
-                        };
-                        reader.readAsDataURL(file);
+                        preview.src = URL.createObjectURL(file);
+                        preview.classList.remove('hidden');
                     }
                 });
             };
 
-            // --- About Section List Manager ---
+            // --- GENERIC CRUD FACTORY for simple list items (Education, Skills, etc.) ---
             const createListManager = (options) => {
-                const { formEl, listEl, storageKey, renderFn, createItemFn, editHtmlFn, updateItemFn } = options;
+                const { formEl, listEl, endpoint, renderFn, createItemFn, editHtmlFn, updateItemFn } = options;
                 
-                const render = () => {
-                    const items = getData(storageKey);
-                    if (!listEl) return;
-                    
-                    const validItems = items.filter(item => {
-                        if (!item || !item.id) return false;
-                        if (storageKey === keys.skills && !item.name) return false;
-                        return true;
-                    });
-
-                    listEl.innerHTML = validItems.map(item => `<li class="flex justify-between items-center p-2 bg-secondaryBackgroundColor rounded-md" data-id="${item.id}">${renderFn(item)}</li>`).join('');
+                const render = async () => {
+                    try {
+                        const response = await fetch(`${API_URL}/${endpoint}`);
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        const items = await response.json();
+                        if (listEl) {
+                            listEl.innerHTML = items.map(item => `<li class="flex justify-between items-center p-2 bg-secondaryBackgroundColor rounded-md" data-id="${item._id}">${renderFn(item)}</li>`).join('');
+                        }
+                    } catch (error) {
+                        console.error(`Failed to load ${endpoint}:`, error);
+                        if (listEl) listEl.innerHTML = `<p class="text-red-400">Gagal memuat data.</p>`;
+                    }
                 };
 
                 if (formEl) {
-                    formEl.addEventListener('submit', e => {
+                    formEl.addEventListener('submit', async e => {
                         e.preventDefault();
-                        const newItem = createItemFn(formEl);
-                        if(!newItem) return;
-                        const items = getData(storageKey);
-                        items.push(newItem);
-                        saveData(storageKey, items);
-                        render();
-                        formEl.reset();
+                        const newItemData = createItemFn(formEl);
+                        if (!newItemData) return;
+                        try {
+                            const response = await fetch(`${API_URL}/${endpoint}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(newItemData)
+                            });
+                            if (!response.ok) throw new Error('Failed to add item');
+                            render();
+                            formEl.reset();
+                        } catch (error) {
+                            console.error(`Error adding ${endpoint}:`, error);
+                            alert(`Gagal menambahkan item.`);
+                        }
                     });
                 }
 
                 if (listEl) {
-                    listEl.addEventListener('click', e => {
+                    listEl.addEventListener('click', async e => {
                         const li = e.target.closest('li');
                         if (!li) return;
-                        const id = parseInt(li.dataset.id);
+                        const id = li.dataset.id;
                         
                         if (e.target.classList.contains('delete-btn')) {
-                            const items = getData(storageKey);
-                            saveData(storageKey, items.filter(i => i.id !== id));
-                            render();
+                            if (!confirm('Apakah Anda yakin ingin menghapus item ini?')) return;
+                            try {
+                                const response = await fetch(`${API_URL}/${endpoint}/${id}`, { method: 'DELETE' });
+                                if (!response.ok) throw new Error('Failed to delete');
+                                render();
+                            } catch (error) {
+                                alert('Gagal menghapus item.');
+                            }
                         } else if (e.target.classList.contains('edit-btn')) {
-                            const items = getData(storageKey);
-                            const item = items.find(i => i.id === id);
-                            li.innerHTML = editHtmlFn(item);
+                            try {
+                                const res = await fetch(`${API_URL}/${endpoint}`);
+                                const items = await res.json();
+                                const item = items.find(i => i._id === id);
+                                if (item && editHtmlFn) li.innerHTML = editHtmlFn(item);
+                            } catch (error) {
+                                console.error(`Error fetching item for edit:`, error);
+                            }
                         } else if (e.target.classList.contains('save-btn')) {
-                            const items = getData(storageKey);
-                            const item = items.find(i => i.id === id);
-                            const updatedItem = updateItemFn(li);
-                            const index = items.findIndex(i => i.id === id);
-                            items[index] = { ...item, ...updatedItem };
-                            saveData(storageKey, items);
-                            render();
+                            const updatedData = updateItemFn(li);
+                            try {
+                                const response = await fetch(`${API_URL}/${endpoint}/${id}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(updatedData)
+                                });
+                                if (!response.ok) throw new Error('Failed to save changes');
+                                render();
+                            } catch (error) {
+                                alert('Gagal menyimpan perubahan.');
+                            }
                         } else if (e.target.classList.contains('cancel-btn')) {
                             render();
                         }
@@ -438,90 +436,107 @@
                 return render;
             };
 
+            // Initialize CRUD for all simple sections
             const renderEducationList = createListManager({
-                formEl: dom.educationForm, listEl: dom.educationList, storageKey: keys.education,
-                renderFn: item => `<span><strong>${item.title}</strong> - ${item.degree} (${item.years})</span><div class="flex gap-2"><button class="edit-btn btn-secondary text-sm p-1 px-2 rounded-md">Edit</button><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Delete</button></div>`,
-                createItemFn: f => ({ id: Date.now(), title: f.querySelector("#edu-title").value, degree: f.querySelector("#edu-degree").value, years: f.querySelector("#edu-years").value }),
-                editHtmlFn: item => `<div class="flex-grow grid sm:grid-cols-3 gap-2"><input class="form-input" value="${item.title}"><input class="form-input" value="${item.degree}"><input class="form-input" value="${item.years}"></div><div class="flex gap-2 ml-4"><button class="save-btn btn-primary text-sm p-1 px-2 rounded-md">Save</button><button class="cancel-btn btn-secondary text-sm p-1 px-2 rounded-md">Cancel</button></div>`,
+                formEl: dom.educationForm, listEl: dom.educationList, endpoint: 'education',
+                renderFn: item => `<span><strong>${item.title}</strong> - ${item.degree} (${item.years})</span><div class="flex gap-2"><button class="edit-btn btn-secondary text-sm p-1 px-2 rounded-md">Edit</button><button class="delete-btn btn-danger text-sm p-1 px-2 rounded-md">Hapus</button></div>`,
+                createItemFn: f => ({ title: f.querySelector("#edu-title").value, degree: f.querySelector("#edu-degree").value, years: f.querySelector("#edu-years").value }),
+                editHtmlFn: item => `<div class="flex-grow grid sm:grid-cols-3 gap-2"><input class="form-input p-1" value="${item.title}"><input class="form-input p-1" value="${item.degree}"><input class="form-input p-1" value="${item.years}"></div><div class="flex gap-2 ml-4"><button class="save-btn btn-primary text-sm p-1 px-2 rounded-md">Simpan</button><button class="cancel-btn btn-secondary text-sm p-1 px-2 rounded-md">Batal</button></div>`,
                 updateItemFn: li => ({ title: li.querySelectorAll('input')[0].value, degree: li.querySelectorAll('input')[1].value, years: li.querySelectorAll('input')[2].value })
             });
             const renderExperienceList = createListManager({
-                formEl: dom.experienceForm, listEl: dom.experienceList, storageKey: keys.experience,
-                renderFn: item => `<span><strong>${item.title}</strong> - ${item.company}</span><div class="flex gap-2"><button class="edit-btn btn-secondary text-sm p-1 px-2 rounded-md">Edit</button><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Delete</button></div>`,
-                createItemFn: f => ({ id: Date.now(), title: f.querySelector("#exp-title").value, company: f.querySelector("#exp-company").value }),
-                editHtmlFn: item => `<div class="flex-grow grid sm:grid-cols-2 gap-2"><input class="form-input" value="${item.title}"><input class="form-input" value="${item.company}"></div><div class="flex gap-2 ml-4"><button class="save-btn btn-primary text-sm p-1 px-2 rounded-md">Save</button><button class="cancel-btn btn-secondary text-sm p-1 px-2 rounded-md">Cancel</button></div>`,
+                formEl: dom.experienceForm, listEl: dom.experienceList, endpoint: 'experience',
+                renderFn: item => `<span><strong>${item.title}</strong> - ${item.company}</span><div class="flex gap-2"><button class="edit-btn btn-secondary text-sm p-1 px-2 rounded-md">Edit</button><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Hapus</button></div>`,
+                createItemFn: f => ({ title: f.querySelector("#exp-title").value, company: f.querySelector("#exp-company").value }),
+                editHtmlFn: item => `<div class="flex-grow grid sm:grid-cols-2 gap-2"><input class="form-input p-1" value="${item.title}"><input class="form-input p-1" value="${item.company}"></div><div class="flex gap-2 ml-4"><button class="save-btn btn-primary text-sm p-1 px-2 rounded-md">Simpan</button><button class="cancel-btn btn-secondary text-sm p-1 px-2 rounded-md">Batal</button></div>`,
                 updateItemFn: li => ({ title: li.querySelectorAll('input')[0].value, company: li.querySelectorAll('input')[1].value })
             });
             const renderOrganizationList = createListManager({
-                formEl: dom.organizationForm, listEl: dom.organizationList, storageKey: keys.organization,
-                renderFn: item => `<span><strong>${item.name}</strong> - ${item.role}</span><div class="flex gap-2"><button class="edit-btn btn-secondary text-sm p-1 px-2 rounded-md">Edit</button><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Delete</button></div>`,
-                createItemFn: f => ({ id: Date.now(), name: f.querySelector("#org-name").value, role: f.querySelector("#org-role").value }),
-                editHtmlFn: item => `<div class="flex-grow grid sm:grid-cols-2 gap-2"><input class="form-input" value="${item.name}"><input class="form-input" value="${item.role}"></div><div class="flex gap-2 ml-4"><button class="save-btn btn-primary text-sm p-1 px-2 rounded-md">Save</button><button class="cancel-btn btn-secondary text-sm p-1 px-2 rounded-md">Cancel</button></div>`,
+                formEl: dom.organizationForm, listEl: dom.organizationList, endpoint: 'organization',
+                renderFn: item => `<span><strong>${item.name}</strong> - ${item.role}</span><div class="flex gap-2"><button class="edit-btn btn-secondary text-sm p-1 px-2 rounded-md">Edit</button><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Hapus</button></div>`,
+                createItemFn: f => ({ name: f.querySelector("#org-name").value, role: f.querySelector("#org-role").value }),
+                editHtmlFn: item => `<div class="flex-grow grid sm:grid-cols-2 gap-2"><input class="form-input p-1" value="${item.name}"><input class="form-input p-1" value="${item.role}"></div><div class="flex gap-2 ml-4"><button class="save-btn btn-primary text-sm p-1 px-2 rounded-md">Simpan</button><button class="cancel-btn btn-secondary text-sm p-1 px-2 rounded-md">Batal</button></div>`,
                 updateItemFn: li => ({ name: li.querySelectorAll('input')[0].value, role: li.querySelectorAll('input')[1].value })
             });
             const renderActivityList = createListManager({
-                formEl: dom.activityForm, listEl: dom.activityList, storageKey: keys.activity,
-                renderFn: item => `<span><strong>${item.title}</strong> - ${item.description}</span><div class="flex gap-2"><button class="edit-btn btn-secondary text-sm p-1 px-2 rounded-md">Edit</button><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Delete</button></div>`,
-                createItemFn: f => ({ id: Date.now(), title: f.querySelector("#act-title").value, description: f.querySelector("#act-desc").value }),
-                editHtmlFn: item => `<div class="flex-grow grid sm:grid-cols-2 gap-2"><input class="form-input" value="${item.title}"><input class="form-input" value="${item.description}"></div><div class="flex gap-2 ml-4"><button class="save-btn btn-primary text-sm p-1 px-2 rounded-md">Save</button><button class="cancel-btn btn-secondary text-sm p-1 px-2 rounded-md">Cancel</button></div>`,
+                formEl: dom.activityForm, listEl: dom.activityList, endpoint: 'activity',
+                renderFn: item => `<span><strong>${item.title}</strong> - ${item.description}</span><div class="flex gap-2"><button class="edit-btn btn-secondary text-sm p-1 px-2 rounded-md">Edit</button><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Hapus</button></div>`,
+                createItemFn: f => ({ title: f.querySelector("#act-title").value, description: f.querySelector("#act-desc").value }),
+                editHtmlFn: item => `<div class="flex-grow grid sm:grid-cols-2 gap-2"><input class="form-input p-1" value="${item.title}"><input class="form-input p-1" value="${item.description}"></div><div class="flex gap-2 ml-4"><button class="save-btn btn-primary text-sm p-1 px-2 rounded-md">Simpan</button><button class="cancel-btn btn-secondary text-sm p-1 px-2 rounded-md">Batal</button></div>`,
                 updateItemFn: li => ({ title: li.querySelectorAll('input')[0].value, description: li.querySelectorAll('input')[1].value })
             });
              const renderSkillsList = createListManager({
-                formEl: dom.skillForm, listEl: dom.skillsList, storageKey: keys.skills,
-                renderFn: item => `<span>${item.name || ''}</span><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Delete</button>`,
+                formEl: dom.skillForm, listEl: dom.skillsList, endpoint: 'skills',
+                renderFn: item => `<span>${item.name || ''}</span><button class="delete-btn btn-danger p-1 px-2 rounded-md text-sm">Hapus</button>`,
                 createItemFn: f => { 
                     const name = dom.skillInput.value.trim(); 
                     if (!name) return null;
-                    return { id: Date.now(), name };
+                    return { name };
                 },
-                editHtmlFn: () => ``,
-                updateItemFn: () => ({})
             });
-            
-            // --- Generic Item Manager for Portfolio & Articles ---
+
+            // --- CRUD MANAGER for complex items (Portfolio & Articles) ---
             const createItemManager = (type) => {
-                const storageKey = keys[type];
+                const endpoint = type === 'portfolio' ? 'portfolio' : 'articles';
                 const tableBody = dom[`${type}TableBody`];
                 const createForm = dom[`create${type.charAt(0).toUpperCase() + type.slice(1)}Form`];
                 const createImgInput = dom[`create${type.charAt(0).toUpperCase() + type.slice(1)}ImgInput`];
                 const createImgPreview = dom[`create${type.charAt(0).toUpperCase() + type.slice(1)}ImgPreview`];
-                let currentImageBase64 = '';
+                
+                handleImagePreview(createImgInput, createImgPreview);
 
-                handleImagePreview(createImgInput, createImgPreview, (base64) => {
-                    currentImageBase64 = base64;
-                });
-
-                const renderTable = () => {
-                    const items = getData(storageKey);
-                    tableBody.innerHTML = items.map(item => `
-                        <tr class="border-b border-lineColor">
-                            <td class="p-4">${item.title}</td>
-                            <td class="p-4 hidden sm:table-cell">${item.description.substring(0, 50)}...</td>
-                            <td class="p-4"><img src="${item.imageData}" alt="${item.title}" class="w-16 h-16 object-cover rounded-md"></td>
-                            <td class="p-4">
-                                <button class="edit-item-btn btn-secondary text-sm p-1 px-2 rounded-md" data-id="${item.id}" data-type="${type}">Edit</button>
-                                <button class="delete-item-btn btn-danger text-sm p-1 px-2 rounded-md ml-2" data-id="${item.id}" data-type="${type}">Delete</button>
-                            </td>
-                        </tr>
-                    `).join('');
+                const renderTable = async () => {
+                     try {
+                        const response = await fetch(`${API_URL}/${endpoint}`);
+                        const items = await response.json();
+                        tableBody.innerHTML = items.map(item => `
+                            <tr class="border-b border-lineColor">
+                                <td class="p-4">${item.title}</td>
+                                <td class="p-4 hidden sm:table-cell">${item.description.substring(0, 50)}...</td>
+                                <td class="p-4"><img src="${item.imageData}" alt="${item.title}" class="w-16 h-16 object-cover rounded-md"></td>
+                                <td class="p-4">
+                                    <button class="edit-item-btn btn-secondary text-sm p-1 px-2 rounded-md" data-id="${item._id}" data-type="${type}">Edit</button>
+                                    <button class="delete-item-btn btn-danger text-sm p-1 px-2 rounded-md ml-2" data-id="${item._id}" data-type="${type}">Hapus</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } catch (error) {
+                        tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-400">Gagal memuat data.</td></tr>`;
+                    }
                 };
 
-                createForm.addEventListener('submit', (e) => {
+                createForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    const newItem = {
-                        id: Date.now(),
-                        title: createForm.querySelector(`input[id$="title"]`).value,
-                        description: createForm.querySelector(`textarea[id$="description"]`).value,
-                        tags: createForm.querySelector(`input[id$="tags"]`).value.split(',').map(t => t.trim()),
-                        imageData: currentImageBase64
-                    };
-                    const items = getData(storageKey);
-                    items.push(newItem);
-                    saveData(storageKey, items);
-                    renderTable();
-                    createForm.reset();
-                    createImgPreview.classList.add('hidden');
-                    currentImageBase64 = '';
+                    const file = createImgInput.files[0];
+                    if (!file) {
+                        alert('Gambar wajib diunggah!');
+                        return;
+                    }
+
+                    try {
+                        const imageData = await toBase64(file);
+                        const newItem = {
+                            title: createForm.querySelector(`input[id$="title"]`).value,
+                            description: createForm.querySelector(`textarea[id$="description"]`).value,
+                            tags: createForm.querySelector(`input[id$="tags"]`).value.split(',').map(t => t.trim()),
+                            imageData: imageData
+                        };
+
+                        const response = await fetch(`${API_URL}/${endpoint}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(newItem)
+                        });
+                        
+                        if (!response.ok) throw new Error('Failed to add new item');
+
+                        renderTable();
+                        createForm.reset();
+                        createImgPreview.src = '#';
+                        createImgPreview.classList.add('hidden');
+                    } catch (error) {
+                        alert('Gagal menambahkan item.');
+                    }
                 });
 
                 return renderTable;
@@ -530,88 +545,146 @@
             const renderPortfolioTable = createItemManager('portfolio');
             const renderArticleTable = createItemManager('article');
 
-            // --- Generic Edit/Delete Listeners on Main Content ---
-            document.querySelector('main').addEventListener('click', (e) => {
+            // --- MAIN EVENT LISTENER for EDIT/DELETE buttons in tables ---
+            document.querySelector('main').addEventListener('click', async (e) => {
                 const target = e.target;
-                const id = parseInt(target.dataset.id);
+                const id = target.dataset.id;
                 const type = target.dataset.type;
 
-                if (!type || !keys[type]) return;
+                if (!id || !type || !['portfolio', 'articles'].includes(type)) return;
 
-                const storageKey = keys[type];
-                
+                const endpoint = type === 'portfolio' ? 'portfolio' : 'articles';
+
                 if (target.classList.contains('delete-item-btn')) {
-                    const items = getData(storageKey).filter(i => i.id !== id);
-                    saveData(storageKey, items);
-                    if (type === 'portfolio') renderPortfolioTable();
-                    if (type === 'article') renderArticleTable();
-                } else if (target.classList.contains('edit-item-btn')) {
-                    const item = getData(storageKey).find(i => i.id === id);
-                    dom.editModalTitle.textContent = `Edit ${type.charAt(0).toUpperCase() + type.slice(1)} Item`;
-                    dom.editForm.querySelector('#edit-id').value = item.id;
-                    dom.editForm.querySelector('#edit-type').value = type;
-                    dom.editForm.querySelector('#edit-title').value = item.title;
-                    dom.editForm.querySelector('#edit-description').value = item.description;
-                    dom.editForm.querySelector('#edit-tags').value = item.tags.join(', ');
-                    dom.editImgPreview.src = item.imageData;
-                    dom.editImgPreview.classList.remove('hidden');
-                    dom.editModal.classList.remove('hidden');
+                     if (!confirm('Apakah Anda yakin ingin menghapus item ini?')) return;
+                    try {
+                        const response = await fetch(`${API_URL}/${endpoint}/${id}`, { method: 'DELETE' });
+                        if (!response.ok) throw new Error('Failed to delete');
+                        if (type === 'portfolio') renderPortfolioTable();
+                        else renderArticleTable();
+                    } catch (error) {
+                         alert('Gagal menghapus item.');
+                    }
+                } 
+                else if (target.classList.contains('edit-item-btn')) {
+                    try {
+                        const response = await fetch(`${API_URL}/${endpoint}`);
+                        const items = await response.json();
+                        const item = items.find(i => i._id === id);
+                        
+                        dom.editModalTitle.textContent = `Edit ${type.charAt(0).toUpperCase() + type.slice(1)} Item`;
+                        dom.editForm.querySelector('#edit-id').value = item._id;
+                        dom.editForm.querySelector('#edit-type').value = type;
+                        dom.editForm.querySelector('#edit-title').value = item.title;
+                        dom.editForm.querySelector('#edit-description').value = item.description;
+                        dom.editForm.querySelector('#edit-tags').value = item.tags.join(', ');
+                        dom.editImgPreview.src = item.imageData;
+                        dom.editImgPreview.classList.remove('hidden');
+                        dom.editModal.classList.remove('hidden');
+                    } catch(error) {
+                        console.error(`Error fetching ${type} for edit:`, error);
+                    }
                 }
             });
 
-            // --- Edit Form Submission ---
-            dom.editForm.addEventListener('submit', (e) => {
+            // --- EDIT MODAL FORM SUBMISSION ---
+            dom.editForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const id = parseInt(dom.editForm.querySelector('#edit-id').value);
+                const id = dom.editForm.querySelector('#edit-id').value;
                 const type = dom.editForm.querySelector('#edit-type').value;
-                const storageKey = keys[type];
+                const endpoint = type === 'portfolio' ? 'portfolio' : 'articles';
+                const file = dom.editImgInput.files[0];
 
-                const items = getData(storageKey);
-                const index = items.findIndex(i => i.id === id);
-                let newImageData = items[index].imageData;
-                
-                const onUpdate = (imageData) => {
-                    items[index] = {
-                        id,
+                try {
+                    let imageData = dom.editImgPreview.src;
+                    if (file) {
+                        imageData = await toBase64(file);
+                    }
+                    
+                    const updatedData = {
                         title: dom.editForm.querySelector('#edit-title').value,
                         description: dom.editForm.querySelector('#edit-description').value,
                         tags: dom.editForm.querySelector('#edit-tags').value.split(',').map(t => t.trim()),
                         imageData: imageData
                     };
-                    saveData(storageKey, items);
-                    if (type === 'portfolio') renderPortfolioTable();
-                    if (type === 'article') renderArticleTable();
-                    dom.editModal.classList.add('hidden');
-                };
 
-                if (dom.editImgInput.files && dom.editImgInput.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => onUpdate(event.target.result);
-                    reader.readAsDataURL(dom.editImgInput.files[0]);
-                } else {
-                    onUpdate(newImageData);
+                    const response = await fetch(`${API_URL}/${endpoint}/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updatedData)
+                    });
+
+                    if (!response.ok) throw new Error('Failed to save changes');
+                    
+                    if (type === 'portfolio') renderPortfolioTable();
+                    else renderArticleTable();
+                    
+                    dom.editModal.classList.add('hidden');
+                    dom.editForm.reset();
+                    dom.editImgInput.value = '';
+
+                } catch (error) {
+                    alert('Gagal menyimpan perubahan.');
                 }
             });
 
-
-            const loadAdminData = () => {
-                const heroData = getObjectData(keys.hero);
-                document.getElementById('hero-pre-title').value = heroData.preTitle || '';
-                document.getElementById('hero-name').value = heroData.name || '';
-                document.getElementById('hero-highlight').value = heroData.highlight || '';
-                document.getElementById('hero-description').value = heroData.description || '';
-                if(heroData.imageData) {
-                    dom.heroImagePreview.src = heroData.imageData;
-                    dom.heroImagePreview.classList.remove('hidden');
-                    currentHeroImageBase64 = heroData.imageData;
+            // --- HERO SECTION MANAGEMENT ---
+            const loadHeroData = async () => {
+                try {
+                    const response = await fetch(`${API_URL}/hero`);
+                    const heroData = await response.json();
+                    if (heroData) {
+                        document.getElementById('hero-pre-title').value = heroData.preTitle || '';
+                        document.getElementById('hero-name').value = heroData.name || '';
+                        document.getElementById('hero-highlight').value = heroData.highlight || '';
+                        document.getElementById('hero-description').value = heroData.description || '';
+                        if (heroData.imageData) {
+                            dom.heroImagePreview.src = heroData.imageData;
+                            dom.heroImagePreview.classList.remove('hidden');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to load Hero data:', error);
                 }
+            };
+
+            dom.heroForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const file = dom.heroImageInput.files[0];
+                try {
+                    let imageData = dom.heroImagePreview.src.startsWith('data:image') ? dom.heroImagePreview.src : null;
+                    if(file) {
+                        imageData = await toBase64(file);
+                    }
+                    const dataToSave = {
+                        preTitle: document.getElementById('hero-pre-title').value,
+                        name: document.getElementById('hero-name').value,
+                        highlight: document.getElementById('hero-highlight').value,
+                        description: document.getElementById('hero-description').value,
+                        imageData: imageData
+                    };
+                    const response = await fetch(`${API_URL}/hero`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(dataToSave)
+                    });
+                    if (!response.ok) throw new Error('Failed to save Hero data');
+                    alert('Hero section berhasil disimpan!');
+                } catch (error) {
+                    alert('Gagal menyimpan Hero section.');
+                }
+            });
+
+            // --- MAIN INITIALIZATION & NAVIGATION ---
+            const loadAdminData = () => {
+                loadHeroData();
                 renderEducationList();
                 renderExperienceList();
                 renderOrganizationList();
                 renderActivityList();
                 renderSkillsList();
                 renderPortfolioTable();
-                renderArticleTable(); // Render article table on load
+                renderArticleTable();
             };
             
             const setupNavigation = () => {
@@ -640,16 +713,27 @@
                 }
             };
             
-            // --- Global Event Listeners ---
-            dom.loginForm.addEventListener('submit', (e) => {
+            dom.loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 dom.loginError.classList.add('hidden');
-                if (document.getElementById('password').value === ADMIN_PASSWORD) {
-                    sessionStorage.setItem('isAdmin', 'true');
-                    checkLogin();
-                } else {
+                const password = document.getElementById('password').value;
+                try {
+                    const response = await fetch(`${API_URL}/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password })
+                    });
+                    const result = await response.json();
+                    if (response.ok && result.success) {
+                        sessionStorage.setItem('isAdmin', 'true');
+                        checkLogin();
+                    } else {
+                        dom.loginError.querySelector('span.sm\\:inline').textContent = result.message || 'Password yang Anda masukkan salah.';
+                        dom.loginError.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    dom.loginError.querySelector('span.sm\\:inline').textContent = 'Tidak dapat terhubung ke server.';
                     dom.loginError.classList.remove('hidden');
-                    document.getElementById('password').value = '';
                 }
             });
 
@@ -657,31 +741,34 @@
                 sessionStorage.removeItem('isAdmin');
                 checkLogin();
             });
-
-            dom.heroForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const onUpdate = (imageData) => {
-                    saveObjectData(keys.hero, {
-                        preTitle: document.getElementById('hero-pre-title').value,
-                        name: document.getElementById('hero-name').value,
-                        highlight: document.getElementById('hero-highlight').value,
-                        description: document.getElementById('hero-description').value,
-                        imageData: imageData || currentHeroImageBase64
-                    });
-                     alert('Hero section saved!');
-                };
-                if(dom.heroImageInput.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => onUpdate(event.target.result);
-                    reader.readAsDataURL(dom.heroImageInput.files[0]);
-                } else {
-                    onUpdate(currentHeroImageBase64);
-                }
-            });
             
             dom.cancelEditBtn.addEventListener('click', () => { dom.editModal.classList.add('hidden'); });
             
-            // Initial Load
+            // Setup image previews
+            handleImagePreview(dom.heroImageInput, dom.heroImagePreview);
+            handleImagePreview(dom.createPortfolioImgInput, dom.createPortfolioImgPreview);
+            handleImagePreview(dom.createArticleImgInput, dom.createArticleImgPreview);
+            handleImagePreview(dom.editImgInput, dom.editImgPreview);
+
+            // Setup mobile menu
+            if (dom.mobileMenuBtn && dom.sidebar && dom.sidebarOverlay) {
+                const closeSidebar = () => {
+                    dom.sidebar.classList.remove('mobile-active');
+                    dom.sidebarOverlay.classList.add('hidden');
+                };
+                dom.mobileMenuBtn.addEventListener('click', () => {
+                    dom.sidebar.classList.toggle('mobile-active');
+                    dom.sidebarOverlay.classList.toggle('hidden');
+                });
+                dom.sidebarOverlay.addEventListener('click', closeSidebar);
+                dom.navLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth < 768) closeSidebar();
+                    });
+                });
+            }
+
+            // Initial load
             checkLogin();
         });
     </script>
