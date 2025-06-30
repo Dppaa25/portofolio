@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="styles/responsive.css" />
     <title>Muhammad Daffa Saputra - Software Engineer</title>
     <style>
-      /* Gaya tambahan untuk tombol admin agar terlihat berbeda */
       .btn-admin {
         padding: 0.5rem 1rem;
         background-color: #64ffda;
@@ -38,7 +37,7 @@
               <li><a href="#about">About</a></li>
               <li><a href="article.html">Article</a></li>
               <li><a href="#contact">Contact</a></li>
-              <!-- Tombol Admin & Logout (disembunyikan secara default) -->
+              <!-- Admin buttons are now controlled by checkAdminStatus -->
               <li class="admin-nav-item" style="display: none;"><a href="admin.html" class="btn-admin">Admin Page</a></li>
               <li class="admin-nav-item" style="display: none;"><button id="main-logout-btn" class="btn-admin">Logout</button></li>
             </ul>
@@ -54,14 +53,15 @@
         <section id="hero">
           <div class="hero-left">
             <h3 id="hero-pre-title" class="pre-title">My name is</h3>
-            <h1 id="hero-full-name" class="hero-name">Muhammad <span>Daffa</span> Saputra</h1>
+            <h1 id="hero-full-name" class="hero-name">Loading <span>...</span></h1>
             <p id="hero-description">
-              Web Developer | UI/UX Designer
+              Loading...
             </p>
           </div>
 
           <div class="hero-right">
-            <img id="hero-image" src="./images/hero.svg" alt="Person Standing" />
+            <!-- Fallback image in case the one from DB fails to load -->
+            <img id="hero-image" src="https://placehold.co/400x400/0a192f/e6f1ff?text=MDS" alt="Person Standing" />
           </div>
         </section>
       </div>
@@ -76,7 +76,7 @@
             <h3 class="pre-title">My Portfolio</h3>
             <h1 class="section-title">Featured Projects</h1>
             <div id="portfolio-grid" class="grid-3">
-                <!-- Projects will be injected here by JavaScript -->
+                <p>Loading projects...</p>
             </div>
           </div>
         </section>
@@ -89,7 +89,7 @@
                 <h1 class="section-title">Education History</h1>
                 <div class="education-container">
                      <div id="education-timeline">
-                        <!-- JS will inject .education items here -->
+                        <p>Loading education history...</p>
                      </div>
                 </div>
             </div>
@@ -106,7 +106,7 @@
                   My Skill in sofware engineers.
                 </p>
                 <div id="skills-list-container" class="skills-list">
-                    <!-- JS will inject two <ul> elements here -->
+                    <p>Loading skills...</p>
                 </div>
             </div>
           </div>
@@ -120,7 +120,7 @@
                 <h1 class="section-title">Work Experience</h1>
                 <div class="single-card-container">
                     <div class="experience-card">
-                        <ul id="experience-list-display"></ul>
+                        <ul id="experience-list-display"><p>Loading experience...</p></ul>
                     </div>
                 </div>
             </div>
@@ -133,7 +133,7 @@
                 <h1 class="section-title">Organization</h1>
                 <div class="single-card-container">
                     <div class="experience-card">
-                        <ul id="organization-list-display"></ul>
+                        <ul id="organization-list-display"><p>Loading organizations...</p></ul>
                     </div>
                 </div>
             </div>
@@ -147,7 +147,7 @@
                 <div class="single-card-container">
                     <div class="experience-card">
                         <ul id="activity-list-display">
-                           <!-- Activity items will be rendered here -->
+                           <p>Loading activities...</p>
                         </ul>
                     </div>
                 </div>
@@ -155,7 +155,7 @@
         </section>
         <!-- End Experience, Organization, Activity Section -->
     </div>
-    <!-- Wrapper for "About" content ends here -->
+    <!-- End Wrapper for "About" content -->
 
 
     <!-- Contact -->
@@ -166,24 +166,11 @@
             <h1 class="section-title">Contact</h1>
       
             <div class="social-links">
-              <a href="mailto:dummyemail@gmail.com" class="social-icon" target="_blank" aria-label="Email">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path d="M0 3v18h24v-18h-24zm21.518 2l-9.518 7.713-9.518-7.713h19.036zm-19.518 14v-11.817l10 8.104 10-8.104v11.817h-20z"/>
-                </svg>
-              </a>
-              <a href="https://www.linkedin.com" class="social-icon" target="_blank" aria-label="LinkedIn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/>
-                </svg>
-              </a>
-              <a href="https://www.github.com" class="social-icon" target="_blank" aria-label="GitHub">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-              </a>
-              <a href="https://whatsapp.com" class="social-icon" target="_blank" aria-label="WhatsApp">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99 0-3.903-.52-5.586-1.458l-6.323 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.267.655 4.398 1.803 6.12l-1.331 4.869 4.893-1.291z"/></svg>
-              </a>
+              <!-- Social links remain static -->
+              <a href="mailto:dummyemail@gmail.com" class="social-icon" target="_blank" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 3v18h24v-18h-24zm21.518 2l-9.518 7.713-9.518-7.713h19.036zm-19.518 14v-11.817l10 8.104 10-8.104v11.817h-20z"/></svg></a>
+              <a href="https://www.linkedin.com" class="social-icon" target="_blank" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/></svg></a>
+              <a href="https://www.github.com" class="social-icon" target="_blank" aria-label="GitHub"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
+              <a href="https://whatsapp.com" class="social-icon" target="_blank" aria-label="WhatsApp"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99 0-3.903-.52-5.586-1.458l-6.323 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.267.655 4.398 1.803 6.12l-1.331 4.869 4.893-1.291z"/></svg></a>
             </div>
       
             <div class="value-card">
@@ -195,7 +182,6 @@
             <p class="cta-text">Ingin berdiskusi lebih lanjut? Silakan kirim pesan.</p>
       
             <div class="cta-button-container">
-              <!-- Tombol ini sekarang akan membuka modal -->
               <button id="open-modal-btn" class="btn-cta">Kirim Pesan</button>
             </div>
           </div>
@@ -205,64 +191,59 @@
 
     <!-- Footer -->
     <footer>
-      
       <p>&#169; 2025 - Made Muhammad Daffa Saputra</p>
     </footer>
     <!-- End Footer -->
 
-    <!-- ==== STRUKTUR MODAL BARU DIMULAI DI SINI ==== -->
+    <!-- Contact Modal -->
     <div id="contact-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Kirim Pesan</h3>
                 <span id="close-modal-btn" class="close-button">&times;</span>
             </div>
+            <!-- Using Formspree for the contact form -->
             <form action="https://formspree.io/f/xeqwdykj" method="POST" class="modal-form">
-                <div class="form-group">
-                    <label for="name">Nama</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="message">Pesan</label>
-                    <textarea name="message" id="message" rows="4" required></textarea>
-                </div>
+                <div class="form-group"><label for="name">Nama</label><input type="text" id="name" name="name" required></div>
+                <div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email" required></div>
+                <div class="form-group"><label for="message">Pesan</label><textarea name="message" id="message" rows="4" required></textarea></div>
                 <button type="submit" class="btn-cta">Kirim Pesan</button>
             </form>
         </div>
     </div>
-    <!-- ==== STRUKTUR MODAL BARU SELESAI DI SINI ==== -->
+    <!-- End Contact Modal -->
 
 
-    <!-- JavaScript untuk fungsionalitas modal & rendering dinamis -->
+    <!-- Main JavaScript Logic -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // == PENTING ==
+            // Ganti URL ini dengan URL Vercel Anda.
+            const API_URL = 'https://tes-vercel-one.vercel.app/api';
+
             // --- Burger Menu Logic ---
             const burger = document.querySelector('.burger');
             const navUl = document.querySelector('nav ul');
-            if(burger && navUl) {
-                burger.addEventListener('click', () => {
+            if (burger && navUl) {
+                const toggleMenu = () => {
                     navUl.classList.toggle('nav-active');
                     burger.classList.toggle('toggle');
-                });
-                // Close menu when a link is clicked
+                };
+                burger.addEventListener('click', toggleMenu);
                 document.querySelectorAll('nav ul li a').forEach(link => {
                     link.addEventListener('click', () => {
-                        navUl.classList.remove('nav-active');
-                        burger.classList.remove('toggle');
+                        if (navUl.classList.contains('nav-active')) {
+                            toggleMenu();
+                        }
                     });
                 });
             }
             
-            // --- Modal Logic ---
+            // --- Contact Modal Logic ---
             const modal = document.getElementById('contact-modal');
             const openBtn = document.getElementById('open-modal-btn');
             const closeBtn = document.getElementById('close-modal-btn');
-
-            if(modal && openBtn && closeBtn) {
+            if (modal && openBtn && closeBtn) {
                 openBtn.addEventListener('click', () => modal.style.display = 'flex');
                 closeBtn.addEventListener('click', () => modal.style.display = 'none');
                 window.addEventListener('click', (event) => {
@@ -273,7 +254,6 @@
             // --- Admin Nav Logic ---
             const adminNavItems = document.querySelectorAll('.admin-nav-item');
             const logoutBtn = document.getElementById('main-logout-btn');
-
             const checkAdminStatus = () => {
                 if (sessionStorage.getItem('isAdmin') === 'true') {
                     adminNavItems.forEach(item => item.style.display = 'list-item');
@@ -281,123 +261,110 @@
                     adminNavItems.forEach(item => item.style.display = 'none');
                 }
             };
-
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', () => {
                     sessionStorage.removeItem('isAdmin');
-                    checkAdminStatus(); // Hide buttons immediately
-                    alert('You have been logged out.');
+                    checkAdminStatus();
                 });
             }
             
-            // --- Generic Data Getter ---
-            const getData = (key, isObject = false) => {
-                const data = localStorage.getItem(key);
-                return data ? JSON.parse(data) : (isObject ? {} : []);
+            // --- DYNAMIC DATA RENDERING FROM API ---
+
+            // Generic function to fetch data and render it
+            const fetchAndRender = async (endpoint, elementId, renderFn, fallbackHtml) => {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                try {
+                    const response = await fetch(`${API_URL}/${endpoint}`);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+                    element.innerHTML = data.length > 0 ? data.map(renderFn).join('') : fallbackHtml;
+                } catch (error) {
+                    console.error(`Failed to load ${endpoint}:`, error);
+                    element.innerHTML = fallbackHtml.replace('No', 'Gagal memuat');
+                }
+            };
+            
+            // Render Hero section
+            const renderHero = async () => {
+                try {
+                    const response = await fetch(`${API_URL}/hero`);
+                    const heroData = await response.json();
+                    if (Object.keys(heroData).length > 0) {
+                        document.getElementById('hero-pre-title').textContent = heroData.preTitle || 'My name is';
+                        document.getElementById('hero-full-name').innerHTML = `${heroData.name || 'Your'} <span>${heroData.highlight || 'Name'}</span>`;
+                        document.getElementById('hero-description').textContent = heroData.description || 'Default description.';
+                        if (heroData.imageData) document.getElementById('hero-image').src = heroData.imageData;
+                    }
+                } catch (error) {
+                    console.error("Failed to load Hero data:", error);
+                }
             };
 
-            // --- Dynamic Hero Rendering ---
-            const renderHero = () => {
-                const heroData = getData('heroData', true);
-                document.getElementById('hero-pre-title').textContent = heroData.preTitle || 'My name is';
-                document.getElementById('hero-full-name').innerHTML = `${heroData.name || 'Your'} <span>${heroData.highlight || 'Name'}</span>`;
-                document.getElementById('hero-description').textContent = heroData.description || 'Default description text.';
-                if (heroData.imageData) document.getElementById('hero-image').src = heroData.imageData;
-            };
+            // Render Portfolios
+            fetchAndRender('portfolio', 'portfolio-grid', item => `
+                <div class="portfolio">
+                    <div class="portfolio-cover"><img src="${item.imageData}" alt="${item.title}" /></div>
+                    <div class="portfolio-info">
+                        <div class="portfolio-title">
+                            <h4>${item.title}</h4>
+                            <a href="#" class="portfolio-link" onclick="event.preventDefault(); alert('Detail project belum tersedia.');"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 17c2.269-9.881 11-11.667 11-11.667v-3.333l7 6.637-7 6.696v-3.333s-6.17-.171-11 5zm12 .145v2.855h-16v-12h6.598c.768-.787 1.561-1.449 2.339-2h-10.937v16h20v-6.769l-2 1.914z"/></svg></a>
+                        </div>
+                        <div class="portfolio-tags">${item.tags.map(tag => `<div>${tag}</div>`).join('')}</div>
+                        <p>${item.description.substring(0, 100)}...</p>
+                    </div>
+                </div>`, '<p class="text-secondaryTextColor col-span-3 text-center">No project items found.</p>');
+            
+            // Render Education
+            fetchAndRender('education', 'education-timeline', item => `
+                <div class="education">
+                    <div class="line"><div></div></div>
+                    <div class="education-info">
+                        <h4 class="education-title">${item.title}</h4>
+                        <p>${item.degree}</p>
+                        <h4 class="education-years">${item.years}</h4>
+                    </div>
+                </div>`, '<p class="text-secondaryTextColor">No education history found.</p>');
 
-            // --- Dynamic Portfolio Rendering ---
-            const renderPortfolios = () => {
-                const grid = document.getElementById('portfolio-grid');
-                if (!grid) return;
-                const data = getData('portfolioData');
-                grid.innerHTML = data.length === 0 
-                    ? '<p class="text-secondaryTextColor col-span-3 text-center">No project items found.</p>'
-                    : data.map(item => `
-                        <div class="portfolio">
-                            <div class="portfolio-cover"><img src="${item.imageData}" alt="${item.title}" /></div>
-                            <div class="portfolio-info">
-                                <div class="portfolio-title">
-                                    <h4>${item.title}</h4>
-                                    <a href="#" class="portfolio-link" onclick="event.preventDefault(); alert('Detail project belum tersedia.');"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 17c2.269-9.881 11-11.667 11-11.667v-3.333l7 6.637-7 6.696v-3.333s-6.17-.171-11 5zm12 .145v2.855h-16v-12h6.598c.768-.787 1.561-1.449 2.339-2h-10.937v16h20v-6.769l-2 1.914z"/></svg></a>
-                                </div>
-                                <div class="portfolio-tags">${item.tags.map(tag => `<div>${tag}</div>`).join('')}</div>
-                                <p>${item.description.substring(0, 100)}...</p>
-                            </div>
-                        </div>`).join('');
-            };
-
-            // --- Dynamic About Sections Rendering ---
-            const renderAboutSections = () => {
-                // Render Education
-                const eduTimeline = document.getElementById('education-timeline');
-                if(eduTimeline) {
-                    const data = getData('educationData');
-                    eduTimeline.innerHTML = data.length > 0 ? data.map(item => `
-                        <div class="education">
-                            <div class="line"><div></div></div>
-                            <div class="education-info">
-                                <h4 class="education-title">${item.title}</h4>
-                                <p>${item.degree}</p>
-                                <h4 class="education-years">${item.years}</h4>
-                            </div>
-                        </div>`).join('') : '<p class="text-secondaryTextColor">No education history found.</p>';
-                }
-
-                // Render Experience
-                const expList = document.getElementById('experience-list-display');
-                if(expList) {
-                    const data = getData('experienceData');
-                    expList.innerHTML = data.length > 0 ? data.map(item => `
-                        <li>
-                            <h5>${item.title}</h5>
-                            <p>${item.company}</p>
-                        </li>`).join('') : '<li><h5>No experience listed</h5><p>Add your work experience in the admin panel.</p></li>';
-                }
-                
-                // Render Organization
-                const orgList = document.getElementById('organization-list-display');
-                if(orgList) {
-                    const data = getData('organizationData');
-                    orgList.innerHTML = data.length > 0 ? data.map(item => `
-                        <li>
-                            <h5>${item.name}</h5>
-                            <p>${item.role}</p>
-                        </li>`).join('') : '<li><h5>No organizations listed</h5><p>Add your organizational experience in the admin panel.</p></li>';
-                }
-
-                // Render Activity
-                const actList = document.getElementById('activity-list-display');
-                if(actList) {
-                    const data = getData('activityData');
-                    actList.innerHTML = data.length > 0 ? data.map(item => `
-                        <li>
-                            <h5>${item.title}</h5>
-                            <p>${item.description}</p>
-                        </li>`).join('') : '<li><h5>No activities listed</h5><p>Add your activities in the admin panel.</p></li>';
-                }
-
-                // Render Skills
+            // Render Skills
+            (async () => {
                 const skillsContainer = document.getElementById('skills-list-container');
-                if(skillsContainer) {
-                    const data = getData('skillsData');
+                if (!skillsContainer) return;
+                try {
+                    const response = await fetch(`${API_URL}/skills`);
+                    const data = await response.json();
                     const validSkills = data.filter(skill => skill && skill.name && skill.name.trim() !== "");
-                    
-                    if(validSkills.length > 0) {
+                    if (validSkills.length > 0) {
                         const mid = Math.ceil(validSkills.length / 2);
                         const firstHalf = validSkills.slice(0, mid);
                         const secondHalf = validSkills.slice(mid);
                         skillsContainer.innerHTML = `<ul>${firstHalf.map(s => `<li>${s.name}</li>`).join('')}</ul><ul>${secondHalf.map(s => `<li>${s.name}</li>`).join('')}</ul>`;
                     } else {
-                        skillsContainer.innerHTML = '<p class="text-secondaryTextColor text-center">No skills listed. Please add some from the admin panel.</p>';
+                        skillsContainer.innerHTML = '<p class="text-secondaryTextColor text-center">No skills listed.</p>';
                     }
+                } catch (error) {
+                    skillsContainer.innerHTML = '<p class="text-secondaryTextColor text-center">Gagal memuat skills.</p>';
                 }
-            };
+            })();
 
-            // Panggil semua fungsi render saat halaman dimuat
+            // Render Experience
+            fetchAndRender('experience', 'experience-list-display', item => `
+                <li><h5>${item.title}</h5><p>${item.company}</p></li>`, 
+                '<li><h5>No experience listed</h5><p>Add your work experience in the admin panel.</p></li>');
+
+            // Render Organization
+            fetchAndRender('organization', 'organization-list-display', item => `
+                <li><h5>${item.name}</h5><p>${item.role}</p></li>`,
+                '<li><h5>No organizations listed</h5><p>Add your organizational experience in the admin panel.</p></li>');
+
+            // Render Activity
+            fetchAndRender('activity', 'activity-list-display', item => `
+                <li><h5>${item.title}</h5><p>${item.description}</p></li>`,
+                '<li><h5>No activities listed</h5><p>Add your activities in the admin panel.</p></li>');
+
+            // Initial calls
             checkAdminStatus();
             renderHero();
-            renderPortfolios();
-            renderAboutSections();
         });
     </script>
   </body>
